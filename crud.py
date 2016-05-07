@@ -1,30 +1,40 @@
 from flask import jsonify, json
+import json
+import re
 import MySQLdb
 
+#Database connection parameters
+hostData="us-cdbr-azure-east-c.cloudapp.net"
+userData="b24bb34d253579"
+passData="850ca65c"
+dbData="SafeTicketDB"
+
 def register(jsonArg):
-	#Database connection, and select object to send queries
-	db = MySQLdb.connect(host=hostData,
-                 	     user=usetData,
-                	     passwd=passData,
-                    	 db=dbData)
+	#JSON Parsing
+	correct_data = json.dumps(jsonMsg)
+	correct = json.loads(correct_data)
+
+	mail = correct["login"]
+	password = correct["password"]
+
+	#Database connection
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 
-	#Parse jsonArg to proper variables
-	longitude = arg['x']
-	lattitude = arg['y']
+	#Execute proper query
+	cur.execute("""INSERT INTO `USERS` (mail, password) VALUES (%s, %s)""", (mail, password,))
+	# results=cur.fetchall() #NECESSARY ? ? ?
 
-	#Execute proper queries
-	cur.execute("INSERT INTO cords (id, longitude, latitude) VALUES (6, 11.11, 22.22)")
-
-	return
+	return(jsonify(response=200))
 
 def print_msg(jsonMsg):
-	data = jsonify(jsonMsg)
+	print("Came into print method")
 
-	login = arg['login']
-	password = arg['password']
+	correct_data = json.dumps(jsonMsg)
+	print("Correct JSON: " + correct_data)
 
-	print "Email: "+login+" "
-	print "Pass: "+password+" "
+	correct = json.loads(correct_data)
+	print("LOGIN: " + correct["login"])
+	print("PASSWORD :" + correct["password"])
 
 	return

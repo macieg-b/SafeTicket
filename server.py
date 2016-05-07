@@ -11,9 +11,16 @@ def index():
 def post():
 	json = request.json
 	crud.print_msg(json)
-	crud.add_record(json)
-	return
+	result = crud.register(json)
 
+	return(result)
+
+@app.route('/api/post', methods = ['POST'])
+def print_post():
+	json = request.json
+	result = crud.print_msg(json)
+
+	return(jsonify(response=200))
 
 if __name__ == '__main__':
 	app.run(port=8000)
