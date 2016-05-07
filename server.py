@@ -8,12 +8,18 @@ def index():
 	 return render_template('index.html')
 
 @app.route('/api/register', methods = ['POST'])
-def post():
+def register():
 	json = request.json
 	crud.print_msg(json)
 	crud.add_record(json)
 	return
 
+@app.route('/api/tickets/<city>', methods = ['POST'])
+def cityinfo(city):
+	print "Weszlo do metody cityinfo, miasto: "+city;
+	crud.return_CityInfo(city);
+	return
 
 if __name__ == '__main__':
+	app.debug = True
 	app.run(port=8000)

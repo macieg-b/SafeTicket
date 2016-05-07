@@ -1,9 +1,15 @@
 from flask import jsonify, json
 import MySQLdb
 
+#Database connection parameters
+hostData="us-cdbr-azure-east-c.cloudapp.net"
+userData="b24bb34d253579"
+passData="850ca65c"
+dbData="SafeTicketDB"
+
 def register(jsonArg):
 	#Database connection, and select object to send queries
-	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 
 	#Parse jsonArg to proper variables
@@ -16,18 +22,25 @@ def register(jsonArg):
 
 def print_msg(jsonMsg):
 	data = jsonify(jsonMsg)
-
 	login = arg['login']
 	password = arg['password']
-
 	print "Email: "+login+" "
 	print "Pass: "+password+" "
-
 	return
 
 def return_CityInfo(city):
-	#Database connection, and select object to send queries
-	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
-	cur=db.cursor()
-	cur.execute("SELECT ")
+	#Database connection, and select object to send queriesW
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	cur = db.cursor()
+	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", city)
+	results=cur.fetchall
+	for row in results:
+		CityName = row[1]
+		Discount = row[2]
+		Type = row[3]
+		Time = row[4]
+
+	print "CityName: "+CityName;
+	cur.close()
+	db.close()
 	return
