@@ -25,7 +25,7 @@ def print_msg(jsonMsg):
 
 	return
 
-def get_CityInfo(city):
+def return_CityInfo(city):
 	#Database connection, and select object to send queries
 	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
 	cur=db.cursor()
