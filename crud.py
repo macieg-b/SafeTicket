@@ -1,7 +1,5 @@
 from flask import jsonify, json
 import MySQLdb
-import peewee
-from peewee import *
 
 def add_record(arg):
 	data=jsonify(arg)

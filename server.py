@@ -7,11 +7,11 @@ app = Flask(__name__)
 def index():
 	 return render_template('index.html')
 
-@app.route('/api/post', methods = ['POST'])
+@app.route('/api/register', methods = ['POST'])
 def post():
 	json = request.json
 	crud.add_record(json)
-	return 
+	return
 
 
 if __name__ == '__main__':
