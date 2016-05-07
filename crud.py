@@ -28,3 +28,11 @@ def print_msg(jsonMsg):
 	print "Pass: "+password+" "
 
 	return
+
+def get_CityInfo(city):
+	#Database connection, and select object to send queries
+	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
+	cur=db.cursor()
+
+	cur.execute("SELECT ")
+	return
