@@ -10,6 +10,7 @@ def index():
 @app.route('/api/register', methods = ['POST'])
 def post():
 	json = request.json
+	crud.print_msg(json)
 	crud.add_record(json)
 	return
 
