@@ -3,10 +3,7 @@ import MySQLdb
 
 def register(jsonArg):
 	#Database connection, and select object to send queries
-	db = MySQLdb.connect(host=hostData,
-                 	     user=usetData,
-                	     passwd=passData,
-                    	 db=dbData)
+	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
 	cur = db.cursor()
 
 	#Parse jsonArg to proper variables
@@ -15,7 +12,6 @@ def register(jsonArg):
 
 	#Execute proper queries
 	cur.execute("INSERT INTO cords (id, longitude, latitude) VALUES (6, 11.11, 22.22)")
-
 	return
 
 def print_msg(jsonMsg):
@@ -33,6 +29,5 @@ def get_CityInfo(city):
 	#Database connection, and select object to send queries
 	db = MySQLdb.connect(host=hostData, user=usetData, passwd=passData, db=dbData)
 	cur=db.cursor()
-
 	cur.execute("SELECT ")
 	return
