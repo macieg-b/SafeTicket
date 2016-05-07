@@ -29,11 +29,13 @@ def print_msg(jsonMsg):
 	return
 
 def return_CityInfo(city):
-	#Database connection, and select object to send queries
+	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
+	#Send query
 	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", [city])
 	results=cur.fetchall()
+	#Collect data
 	for row in results:
 		dbCityName = row[1]
 		dbDiscount = row[2]
@@ -41,4 +43,5 @@ def return_CityInfo(city):
 		dbTime = row[4]
 	cur.close()
 	db.close()
+	#Return proper json
 	return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])
