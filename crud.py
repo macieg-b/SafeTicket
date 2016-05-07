@@ -29,18 +29,16 @@ def print_msg(jsonMsg):
 	return
 
 def return_CityInfo(city):
-	#Database connection, and select object to send queriesW
+	#Database connection, and select object to send queries
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
-	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", city)
-	results=cur.fetchall
+	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", [city])
+	results=cur.fetchall()
 	for row in results:
-		CityName = row[1]
-		Discount = row[2]
-		Type = row[3]
-		Time = row[4]
-
-	print "CityName: "+CityName;
+		dbCityName = row[1]
+		dbDiscount = row[2]
+		dbType = row[3]
+		dbTime = row[4]
 	cur.close()
 	db.close()
-	return
+	return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])

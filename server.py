@@ -16,9 +16,7 @@ def register():
 
 @app.route('/api/tickets/<city>', methods = ['POST'])
 def cityinfo(city):
-	print "Weszlo do metody cityinfo, miasto: "+city;
-	crud.return_CityInfo(city);
-	return
+	return crud.return_CityInfo(city);
 
 if __name__ == '__main__':
 	app.debug = True
