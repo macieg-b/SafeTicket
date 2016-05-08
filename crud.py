@@ -56,13 +56,24 @@ def return_CityInfo(city):
 	cur.close()
 	db.close()
 
-	#Return proper json
-	return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])
+	#Return proper json - old method
+	#return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])
+
+	#Return proper response and json
+	data={
+		'cityname' : dbCityName,
+		'discount' : dbDiscount,
+		'type' : dbType,
+		'time' : dbTime
+	}
+	js = json.dumps(data)
+	resp = Response(js, status=200, mimetype='application/json')
+	return resp
 
 """
 Function to activate user
-- jsonArg has to field 'email' and 'token'
-- We have to check if user (identified by email) inserted correct token
+- jsonArg has two fields 'email' and 'token'
+- We have to check if user (identified by email) has inserted correct token
   If he did we set active field in Database from 0 to 1
 """
 def user_Activate(jsonArg):
