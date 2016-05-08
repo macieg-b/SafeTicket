@@ -28,6 +28,17 @@ def print_msg(jsonMsg):
 	print "Pass: "+password+" "
 	return
 
+"""
+Function which return information about city
+- city is string argument which we use to find proper city in table
+- We select information about city from Database and return as json in format:
+	{
+		"cityname": "Szczecin",
+		"discount": ["\"normalne\", \"ulgowe\""	],
+		"time": ["\"15min\", \"30min\", \"60min\", \"120min\""],
+		"type": ["\"dzienne", \"pospieszne\""		]
+	}
+"""
 def return_CityInfo(city):
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
@@ -47,3 +58,32 @@ def return_CityInfo(city):
 
 	#Return proper json
 	return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])
+
+"""
+Function to activate user
+- jsonArg has to field 'email' and 'token'
+- We have to check if user (identified by email) inserted correct token
+  If he did we set active field in Database from 0 to 1
+"""
+def user_Activate(jsonArg):
+	#Database connection
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	cur = db.cursor()
+	#Execute proper query
+	cur.execute("SELECT `1time_code` FROM `USERS` WHERE Login=%s", [jsonArg['email']])
+	results=cur.fetchall()
+	#Collect data
+	for row in results:
+		db1time_code = row[0]
+
+	#Comaprison of 1time_code from json and that one frome Database
+	if(jsonArg['token']==db1time_code)
+		cur.execute("UPDATE USER SET Activate=1 WHERE Login=%s", [jsonArg['email']])
+		retVal="Success"
+	else
+		retVal="Wrong token"
+
+	#Close Database connection and return response
+	cur.close()
+	db.close()
+	return retVal

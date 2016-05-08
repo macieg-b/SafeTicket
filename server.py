@@ -18,6 +18,11 @@ def register():
 def cityinfo(city):
 	return crud.return_CityInfo(city);
 
+@app.route('/api/user/activate', methods = ['POST'])
+def Activate():
+	return user_Activate(request.json);
+
+
 if __name__ == '__main__':
 	app.debug = True
 	app.run(port=8000)
