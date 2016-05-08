@@ -94,7 +94,8 @@ def user_Activate(jsonArg):
 	else:
 		retVal=Response(status=202)
 
-	#Close Database connection and return response
+	#Commit changes, close Database connection and return response
 	cur.close()
+	db.commit()
 	db.close()
 	return retVal
