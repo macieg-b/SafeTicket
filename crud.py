@@ -1,4 +1,5 @@
 from flask import jsonify, json
+from random import randint
 import json
 import re
 import MySQLdb
@@ -10,20 +11,27 @@ passData="850ca65c"
 dbData="SafeTicketDB"
 
 def register(jsonArg):
-	#JSON Parsing
 	correct_data = json.dumps(jsonArg)
 	correct = json.loads(correct_data)
+	random_code = randint(100000, 999999)
 
 	mail = correct["login"]
 	password = correct["password"]
+	balance = 5.0
+	begin_active = 0
 
-	#Database connection
+	# Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 
-	#Execute proper query
-	cur.execute("""INSERT INTO `USERS` (mail, password) VALUES (%s, %s)""", (mail, password,))
-	# results=cur.fetchall() #NECESSARY ? ? ?
+	# Execute proper query
+	cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code) VALUES (%s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code))
+
+	db.commit()
+
+	# Close Database connection
+	cur.close()
+	db.close()
 
 	return(jsonify(response=200))
 
@@ -37,4 +45,4 @@ def print_msg(jsonMsg):
 	print("LOGIN: " + correct["login"])
 	print("PASSWORD :" + correct["password"])
 
-	return
+	return(jsonify(response=200))

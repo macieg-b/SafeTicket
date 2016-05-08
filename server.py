@@ -10,12 +10,10 @@ def index():
 @app.route('/api/register', methods = ['POST'])
 def post():
 	json = request.json
-	crud.print_msg(json)
 	result = crud.register(json)
+	return(jsonify(response=200))
 
-	return(result)
-
-@app.route('/api/post', methods = ['POST'])
+@app.route('/api/print', methods = ['POST'])
 def print_post():
 	json = request.json
 	result = crud.print_msg(json)
