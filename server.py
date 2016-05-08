@@ -20,7 +20,7 @@ def cityinfo(city):
 
 @app.route('/api/user/activate', methods = ['POST'])
 def Activate():
-	return user_Activate(request.json);
+	return crud.user_Activate(request.json);
 
 
 if __name__ == '__main__':

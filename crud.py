@@ -1,4 +1,4 @@
-from flask import jsonify, json
+from flask import jsonify, json, Response
 import MySQLdb
 
 #Database connection parameters
@@ -77,11 +77,11 @@ def user_Activate(jsonArg):
 		db1time_code = row[0]
 
 	#Comaprison of 1time_code from json and that one frome Database
-	if(jsonArg['token']==db1time_code)
-		cur.execute("UPDATE USER SET Activate=1 WHERE Login=%s", [jsonArg['email']])
-		retVal="Success"
-	else
-		retVal="Wrong token"
+	if(jsonArg['token']==db1time_code):
+		cur.execute("UPDATE USERS SET Active=1 WHERE Login=%s", [jsonArg['email']])
+		retVal=Response(status=200)
+	else:
+		retVal=Response(status=202)
 
 	#Close Database connection and return response
 	cur.close()
