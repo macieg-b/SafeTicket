@@ -70,7 +70,7 @@ def user_Activate(jsonArg):
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 	#Execute proper query
-	cur.execute("SELECT `1time_code` FROM `USERS` WHERE Login=%s", [jsonArg['email']])
+	cur.execute("SELECT `1time_code` FROM `USERS` WHERE `Login`=%s", [jsonArg['email']])
 	results=cur.fetchall()
 	#Collect data
 	for row in results:
@@ -78,7 +78,7 @@ def user_Activate(jsonArg):
 
 	#Comaprison of 1time_code from json and that one frome Database
 	if(jsonArg['token']==db1time_code):
-		cur.execute("UPDATE USERS SET Active=1 WHERE Login=%s", [jsonArg['email']])
+		cur.execute("UPDATE `USERS` SET `Active`=1 WHERE `Login`=%s", [jsonArg['email']])
 		retVal=Response(status=200)
 	else:
 		retVal=Response(status=202)
