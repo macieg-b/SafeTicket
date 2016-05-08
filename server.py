@@ -19,7 +19,7 @@ def cityinfo(city):
 	return crud.return_CityInfo(city);
 
 @app.route('/api/user/activate', methods = ['POST'])
-def Activate():
+def activate():
 	return crud.user_Activate(request.json);
 
 
