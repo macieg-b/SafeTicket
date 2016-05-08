@@ -77,20 +77,6 @@ Function to activate user
   If he did we set active field in Database from 0 to 1
 """
 def user_Activate(jsonArg):
-	#smsApi test
-	api = SmsAPI()
- 	api.auth_token = 'WbosH8UszlJEAXBsttGmmEIjZbKrdMDSep650ZoJ'
-	try:
-		api.service('sms').action('send')
-		api.set_content('Hello Waldemar, SMS API is working.')
-		api.set_params('Safe', 'Ticket')
-		api.set_to('781131256')
-		api.set_from('ECO')
-		result = api.execute()
-		for r in result:
-			print r.id, r.points, r.status
-	except ApiError, e:
-		print '%s - %s' % (e.code, e.message)
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
