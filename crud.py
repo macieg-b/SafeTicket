@@ -11,7 +11,7 @@ dbData="SafeTicketDB"
 
 def register(jsonArg):
 	#JSON Parsing
-	correct_data = json.dumps(jsonMsg)
+	correct_data = json.dumps(jsonArg)
 	correct = json.loads(correct_data)
 
 	mail = correct["login"]
