@@ -15,7 +15,8 @@ def register(jsonArg):
 	#Database connection, and select object to send queries
 	correct_data = json.dumps(jsonArg)
 	correct = json.loads(correct_data)
-	random_code = randint(100000, 999999)
+	#random_code = randint(100000, 999999)
+	random_code = 123456
 
 	mail = correct["login"]
 	password = correct["password"]
@@ -35,7 +36,7 @@ def register(jsonArg):
 	cur.close()
 	db.close()
 
-	send_emal.send(mail, random_code)
+	send_email.send(mail, 123456)
 
 	return(jsonify(response=200))
 
