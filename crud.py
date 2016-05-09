@@ -2,6 +2,7 @@ from flask import jsonify, json
 from random import randint
 import json
 import re
+import send_email
 import MySQLdb
 
 #Database connection parameters
@@ -29,7 +30,7 @@ def register(jsonArg):
 
 	db.commit()
 
-	# Close Database connection
+	# Close and confirm Database connection
 	cur.close()
 	db.close()
 
@@ -44,5 +45,11 @@ def print_msg(jsonMsg):
 	correct = json.loads(correct_data)
 	print("LOGIN: " + correct["login"])
 	print("PASSWORD :" + correct["password"])
+
+	return(jsonify(response=200))
+
+def send(jsonMsg):
+	print("Came into method in crud")
+	send_email.send("waldeksambor@gmail.com", "444555")
 
 	return(jsonify(response=200))

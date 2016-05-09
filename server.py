@@ -20,5 +20,12 @@ def print_post():
 
 	return(jsonify(response=200))
 
+@app.route('/api/mail', methods = ['POST'])
+def send():
+	print("Came into server")
+	json = request.json
+	result = crud.send(json)
+	return(result)
+
 if __name__ == '__main__':
 	app.run(port=8000)
