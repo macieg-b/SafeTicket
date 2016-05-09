@@ -13,6 +13,14 @@ def post():
 	result = crud.register(json)
 	return(jsonify(response=200))
 
+@app.route('/api/tickets/<city>', methods = ['POST'])
+def cityinfo(city):
+	return crud.return_CityInfo(city);
+
+@app.route('/api/user/activate', methods = ['POST'])
+def activate():
+	return crud.user_Activate(request.json);
+
 @app.route('/api/print', methods = ['POST'])
 def print_post():
 	json = request.json
