@@ -4,7 +4,7 @@ from setting import mail_password
 
 def send(address, code):
 	print("Came into mail")
-	msg = MIMEText("Witaj. Twoj kod aktywacyjny : " + code)
+	msg = MIMEText("Witaj. Twoj kod aktywacyjny : " + str(code))
 
 	print(msg)
 	print(address)
@@ -29,6 +29,3 @@ def send(address, code):
 	server.quit()
 	
 	return
-
-send("waldeksambor@gmail.com", "555555")
-

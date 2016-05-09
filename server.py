@@ -7,7 +7,7 @@ app = Flask(__name__)
 def index():
 	 return render_template('index.html')
 
-@app.route('/api/register', methods = ['POST'])
+@app.route('/api/user/register', methods = ['POST'])
 def post():
 	json = request.json
 	result = crud.register(json)
@@ -28,4 +28,5 @@ def send():
 	return(result)
 
 if __name__ == '__main__':
+	app.debug=True
 	app.run(port=8000)

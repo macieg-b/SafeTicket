@@ -34,6 +34,8 @@ def register(jsonArg):
 	cur.close()
 	db.close()
 
+	send_email.send(mail, random_code)
+
 	return(jsonify(response=200))
 
 def print_msg(jsonMsg):
