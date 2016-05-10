@@ -12,33 +12,46 @@ passData="850ca65c"
 dbData="SafeTicketDB"
 
 def register(jsonArg):
-	#Database connection, and select object to send queries
 	correct_data = json.dumps(jsonArg)
-	correct = json.loads(correct_data)
-	#random_code = randint(100000, 999999)
-	random_code = 123456
-
-	mail = correct["login"]
-	password = correct["password"]
+	correct_json = json.loads(correct_data)
+	
+	random_code = randint(100000, 999999)
+	mail = correct_json["login"]
+	password = correct_json["password"]
 	balance = 5.0
-	begin_active = 0
+	begin_active = "0"
 
-	# Database connection
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	# Execute proper query
-	cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code) VALUES (%s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code))
+	cur.execute("SELECT `Active` FROM `USERS` WHERE `Login` = %s", [correct_json['login']])
+	result = cur.fetchall()
+	
+	query_result = ""
+	for row in result:
+		query_result = row[0]
+	
+	switch_result = switch_of_register_call(query_result)
 
-	db.commit()
+	if (switch_result == "new_code"):
+		### Send new SMS
+		send_email.send(mail, random_code)
+		response = Response(status = 200)
 
-	# Close and confirm Database connection
+	if (switch_result == "activated"):
+		response = Response(status = 202)
+
+	if (switch_result == "add_new"):
+		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code) VALUES (%s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code))
+		db.commit()
+		### Send SMS
+		send_email.send(mail, random_code)
+		response = Response(status = 200)
+
 	cur.close()
 	db.close()
 
-	send_email.send(mail, 123456)
-
-	return(jsonify(response=200))
+	return(response)
 
 def print_msg(jsonMsg):
 	data = jsonify(jsonMsg)
@@ -132,8 +145,12 @@ def print_msg(jsonMsg):
 
 	return(jsonify(response=200))
 
-def send(jsonMsg):
-	print("Came into method in crud")
-	send_email.send("waldeksambor@gmail.com", "444555")
 
-	return(jsonify(response=200))
+# 'Python' switch()
+def switch_of_register_call(result):
+	switcher = {
+		"0": "new_code",
+		"1": "activated",
+	}
+	return switcher.get(result, "add_new")
+

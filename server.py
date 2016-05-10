@@ -35,6 +35,10 @@ def send():
 	result = crud.send(json)
 	return(result)
 
+@app.route('/api/test', methods = ['POST'])
+def test():
+	return crud.test(request.json)
+
 if __name__ == '__main__':
 	app.debug=True
 	app.run(port=8000)
