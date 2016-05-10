@@ -9,9 +9,7 @@ def index():
 
 @app.route('/api/user/register', methods = ['POST'])
 def post():
-	json = request.json
-	result = crud.register(json)
-	return(jsonify(response=200))
+	return(crud.register(request.json))
 
 @app.route('/api/tickets/<city>', methods = ['POST'])
 def cityinfo(city):
@@ -34,10 +32,6 @@ def send():
 	json = request.json
 	result = crud.send(json)
 	return(result)
-
-@app.route('/api/test', methods = ['POST'])
-def test():
-	return crud.test(request.json)
 
 if __name__ == '__main__':
 	app.debug=True
