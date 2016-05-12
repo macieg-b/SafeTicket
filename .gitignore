@@ -61,8 +61,8 @@ docs/_build/
 # PyBuilder
 target/
 
-#Ipython Notebook
+# Ipython Notebook
 .ipynb_checkpoints
 
-# Test
-*.file
+# File with output of running server in background
+nohup.out
