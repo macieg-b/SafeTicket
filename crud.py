@@ -1,6 +1,9 @@
 from flask import jsonify, json, Response
 from random import randint
+from  time import gmtime, strftime
 import json
+import time
+import datetime
 import re
 import send_email
 import MySQLdb
@@ -20,6 +23,7 @@ def register(jsonArg):
 	password = correct_json["password"]
 	balance = 5.0
 	begin_active = "0"
+	time = str(datetime.datetime.now())
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
@@ -42,7 +46,7 @@ def register(jsonArg):
 		response = Response(status = 202)
 
 	if (switch_result == "add_new"):
-		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code) VALUES (%s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code))
+		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code, time_exp) VALUES (%s, %s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code, time))
 		db.commit()
 		### Send SMS
 		send_email.send(mail, random_code)
@@ -146,6 +150,8 @@ def print_msg(jsonMsg):
 	return(jsonify(response=200))
 
 
+### Additional functions
+
 # 'Python' switch()
 def switch_of_register_call(result):
 	switcher = {
@@ -153,4 +159,3 @@ def switch_of_register_call(result):
 		"1": "activated",
 	}
 	return switcher.get(result, "add_new")
-
