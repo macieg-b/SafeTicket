@@ -1,9 +1,9 @@
 from flask import jsonify, json, Response
 from random import randint
 from  time import gmtime, strftime
+from datetime import datetime, timedelta 
 import json
 import time
-import datetime
 import re
 import send_email
 import MySQLdb
@@ -15,7 +15,7 @@ passData="850ca65c"
 dbData="SafeTicketDB"
 
 def register(jsonArg):
-	correct_data = json.dumps(jsonArg)
+	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 	
 	random_code = randint(100000, 999999)
@@ -23,8 +23,9 @@ def register(jsonArg):
 	password = correct_json["password"]
 	balance = 5.0
 	begin_active = "0"
-	time = str(datetime.datetime.now())
-
+	current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
+	#current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
+	
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
@@ -38,16 +39,16 @@ def register(jsonArg):
 	switch_result = switch_of_register_call(query_result)
 
 	if (switch_result == "new_code"):
-		### Send new SMS
-		send_email.send(mail, random_code)
+		update_database_code(mail, cur, db)
 		response = Response(status = 200)
 
 	if (switch_result == "activated"):
 		response = Response(status = 202)
 
 	if (switch_result == "add_new"):
-		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code, time_exp) VALUES (%s, %s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code, time))
+		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code, time_exp) VALUES (%s, %s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code, current_time))
 		db.commit()
+
 		### Send SMS
 		send_email.send(mail, random_code)
 		response = Response(status = 200)
@@ -57,13 +58,39 @@ def register(jsonArg):
 
 	return(response)
 
-def print_msg(jsonMsg):
-	data = jsonify(jsonMsg)
-	login = arg['login']
-	password = arg['password']
-	print "Email: "+login+" "
-	print "Pass: "+password+" "
-	return
+def login(json_arg):
+	correct_data = json.dumps(json_arg)
+	correct_json = json.loads(correct_data)
+	
+	mail = correct_json["login"]
+	password = correct_json["password"]
+
+	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
+	cur = db.cursor()
+
+	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", (mail))
+	result = cur.fetchall()
+
+	query_result = ""
+	for row in result:
+		query_result = row[0]
+
+	### Correct pass:
+	if (password == query_result):
+		response = Response(status = 200)
+
+	### User exists, incorrect password
+	if (password != query_result and query_result != ""):
+		response = Response(status = 401)
+
+	### User does not exists
+	if (query_result == ""):
+		response = Response(status = 403)
+
+	cur.close()
+	db.close()
+
+	return(response)
 
 """
 Function which return information about city
@@ -159,3 +186,17 @@ def switch_of_register_call(result):
 		"1": "activated",
 	}
 	return switcher.get(result, "add_new")
+
+def update_database_code(login, cur, db):
+	random_code = randint(100000, 999999)
+	cur.execute("UPDATE `USERS` SET `1time_code`=%s WHERE `Login`=%s", (random_code, login))
+	db.commit()
+	# SEND SMS
+	send_email.send(login, random_code)
+
+	return
+
+	
+
+	
+
