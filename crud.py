@@ -1,9 +1,11 @@
 from flask import jsonify, json, Response
 from random import randint
+from datetime import datetime, timedelta
 import json
 import re
 import send_email
 import MySQLdb
+
 
 #Database connection parameters
 hostData="us-cdbr-azure-east-c.cloudapp.net"
@@ -100,24 +102,38 @@ def user_Activate(jsonArg):
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 	#Execute proper query
-	cur.execute("SELECT `1time_code` FROM `USERS` WHERE `Login`=%s", [jsonArg['email']])
+	cur.execute("SELECT `1time_code`, `time_exp` FROM `USERS` WHERE `Login`=%s", [jsonArg['email']])
+
 	results=cur.fetchall()
-	#Collect data
-	for row in results:
-		db1time_code = row[0]
-
-	#Comaprison of 1time_code from json and that one frome Database
-	if(jsonArg['token']==db1time_code):
-		cur.execute("UPDATE `USERS` SET `Active`=1 WHERE `Login`=%s", [jsonArg['email']])
-		retVal=Response(status=200)
+	if (cur.rowcount==0):
+		cur.close()
+		db.close()
+		return Response(status=202)
 	else:
-		retVal=Response(status=202)
+		#Collect data
+		for row in results:
+			db1time_code = row[0]
+			dbtime_exp = row[1]
 
-	#Commit changes, close Database connection and return response
-	cur.close()
-	db.commit()
-	db.close()
-	return retVal
+		#Set proper datatime foramt and add 15 minutes shift
+		dbtime_exp_dateformat=datetime.strptime(dbtime_exp, "%Y-%m-%d %H:%M:%S")
+		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours=2)
+		print current_time
+		if (current_time < dbtime_exp_dateformat):
+			#Comaprison of 1time_code from json and that one frome Database
+			if(jsonArg['token']==db1time_code):
+				cur.execute("UPDATE `USERS` SET `Active`=1 WHERE `Login`=%s", [jsonArg['email']])
+				retVal=Response(status=200)
+			else:
+				retVal=Response(status=202)
+		else:
+			retVal=Response(status=202)
+
+		#Commit changes, close Database connection and return response
+		cur.close()
+		db.commit()
+		db.close()
+		return retVal
 
 def print_msg(jsonMsg):
 	print("Came into print method")
