@@ -9,7 +9,7 @@ import re
 import send_email
 import MySQLdb
 
-def register(jsonArg):
+def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 	
