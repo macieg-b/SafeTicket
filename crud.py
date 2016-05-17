@@ -41,25 +41,6 @@ def register(jsonArg):
 
 	return(jsonify(response=200))
 
-def print_msg(jsonMsg):
-	data = jsonify(jsonMsg)
-	login = arg['login']
-	password = arg['password']
-	print "Email: "+login+" "
-	print "Pass: "+password+" "
-	return
-
-"""
-Function which return information about city
-- city is string argument which we use to find proper city in table
-- We select information about city from Database and return as json in format:
-	{
-		"cityname": "Szczecin",
-		"discount": ["\"normalne\", \"ulgowe\""	],
-		"time": ["\"15min\", \"30min\", \"60min\", \"120min\""],
-		"type": ["\"dzienne", \"pospieszne\""		]
-	}
-"""
 def return_CityInfo(city):
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
@@ -91,12 +72,6 @@ def return_CityInfo(city):
 	resp = Response(js, status=200, mimetype='application/json')
 	return resp
 
-"""
-Function to activate user
-- jsonArg has two fields 'email' and 'token'
-- We have to check if user (identified by email) has inserted correct token
-  If he did we set active field in Database from 0 to 1
-"""
 def user_Activate(jsonArg):
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
@@ -134,21 +109,3 @@ def user_Activate(jsonArg):
 		db.commit()
 		db.close()
 		return retVal
-
-def print_msg(jsonMsg):
-	print("Came into print method")
-
-	correct_data = json.dumps(jsonMsg)
-	print("Correct JSON: " + correct_data)
-
-	correct = json.loads(correct_data)
-	print("LOGIN: " + correct["login"])
-	print("PASSWORD :" + correct["password"])
-
-	return(jsonify(response=200))
-
-def send(jsonMsg):
-	print("Came into method in crud")
-	send_email.send("waldeksambor@gmail.com", "444555")
-
-	return(jsonify(response=200))
