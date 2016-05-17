@@ -1,9 +1,13 @@
 from flask import jsonify, json, Response
 from random import randint
+from  time import gmtime, strftime
+from datetime import datetime, timedelta 
 import json
+import time
 import re
 import send_email
 import MySQLdb
+
 
 #Database connection parameters
 hostData="us-cdbr-azure-east-c.cloudapp.net"
@@ -12,41 +16,82 @@ passData="850ca65c"
 dbData="SafeTicketDB"
 
 def register(jsonArg):
-	#Database connection, and select object to send queries
-	correct_data = json.dumps(jsonArg)
-	correct = json.loads(correct_data)
-	#random_code = randint(100000, 999999)
-	random_code = 123456
-
-	mail = correct["login"]
-	password = correct["password"]
+	correct_data = json.dumps(json_arg)
+	correct_json = json.loads(correct_data)
+	
+	random_code = randint(100000, 999999)
+	mail = correct_json["login"]
+	password = correct_json["password"]
 	balance = 5.0
-	begin_active = 0
-
-	# Database connection
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	begin_active = "0"
+	current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
+	#current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
+	
+	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	# Execute proper query
-	cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code) VALUES (%s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code))
+	cur.execute("SELECT `Active` FROM `USERS` WHERE `Login` = %s", [correct_json['login']])
+	result = cur.fetchall()
+	
+	query_result = ""
+	for row in result:
+		query_result = row[0]
+	
+	switch_result = switch_of_register_call(query_result)
 
-	db.commit()
+	if (switch_result == "new_code"):
+		update_database_code(mail, cur, db)
+		response = Response(status = 200)
 
-	# Close and confirm Database connection
+	if (switch_result == "activated"):
+		response = Response(status = 202)
+
+	if (switch_result == "add_new"):
+		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code, time_exp) VALUES (%s, %s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code, current_time))
+		db.commit()
+
+		### Send SMS
+		send_email.send(mail, random_code)
+		response = Response(status = 200)
+
 	cur.close()
 	db.close()
 
-	send_email.send(mail, 123456)
+	return(response)
 
-	return(jsonify(response=200))
+def login(json_arg):
+	correct_data = json.dumps(json_arg)
+	correct_json = json.loads(correct_data)
+	
+	mail = correct_json["login"]
+	password = correct_json["password"]
 
-def print_msg(jsonMsg):
-	data = jsonify(jsonMsg)
-	login = arg['login']
-	password = arg['password']
-	print "Email: "+login+" "
-	print "Pass: "+password+" "
-	return
+	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
+	cur = db.cursor()
+
+	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", (mail))
+	result = cur.fetchall()
+
+	query_result = ""
+	for row in result:
+		query_result = row[0]
+
+	### Correct pass:
+	if (password == query_result):
+		response = Response(status = 200)
+
+	### User exists, incorrect password
+	if (password != query_result and query_result != ""):
+		response = Response(status = 401)
+
+	### User does not exists
+	if (query_result == ""):
+		response = Response(status = 403)
+
+	cur.close()
+	db.close()
+
+	return(response)
 
 """
 Function which return information about city
@@ -132,8 +177,27 @@ def print_msg(jsonMsg):
 
 	return(jsonify(response=200))
 
-def send(jsonMsg):
-	print("Came into method in crud")
-	send_email.send("waldeksambor@gmail.com", "444555")
 
-	return(jsonify(response=200))
+### Additional functions
+
+# 'Python' switch()
+def switch_of_register_call(result):
+	switcher = {
+		"0": "new_code",
+		"1": "activated",
+	}
+	return switcher.get(result, "add_new")
+
+def update_database_code(login, cur, db):
+	random_code = randint(100000, 999999)
+	cur.execute("UPDATE `USERS` SET `1time_code`=%s WHERE `Login`=%s", (random_code, login))
+	db.commit()
+	# SEND SMS
+	send_email.send(login, random_code)
+
+	return
+
+	
+
+	
+
