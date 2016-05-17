@@ -2,18 +2,12 @@ from flask import jsonify, json, Response
 from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
+from setting import hostData, userData, passData, dbData
 import json
 import time
 import re
 import send_email
 import MySQLdb
-
-
-#Database connection parameters
-hostData="us-cdbr-azure-east-c.cloudapp.net"
-userData="b24bb34d253579"
-passData="850ca65c"
-dbData="SafeTicketDB"
 
 def register(jsonArg):
 	correct_data = json.dumps(json_arg)
@@ -93,18 +87,6 @@ def login(json_arg):
 
 	return(response)
 
-"""
-Function which return information about city
-- city is string argument which we use to find proper city in table
-- We select information about city from Database and return as json in format:
-	{
-		"cityname": "Szczecin",
-		"discount": ["\"normalne\", \"ulgowe\""	],
-		"time": ["\"15min\", \"30min\", \"60min\", \"120min\""],
-		"type": ["\"dzienne", \"pospieszne\""		]
-	}
-"""
-
 def return_CityInfo(city):
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
@@ -154,7 +136,7 @@ def user_Activate(jsonArg):
 			db1time_code = row[0]
 			dbtime_exp = row[1]
 
-		#Set proper datatime foramt and add 15 minutes shift
+		#Set proper datatime format 
 		dbtime_exp_dateformat=datetime.strptime(dbtime_exp, "%Y-%m-%d %H:%M:%S")
 		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours=2)
 		print current_time
@@ -206,8 +188,3 @@ def update_database_code(login, cur, db):
 
 	return
 
-	
-
-	
-
->>>>>>> master
