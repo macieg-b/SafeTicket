@@ -8,6 +8,7 @@ import re
 import send_email
 import MySQLdb
 
+
 #Database connection parameters
 hostData="us-cdbr-azure-east-c.cloudapp.net"
 userData="b24bb34d253579"
