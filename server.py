@@ -3,15 +3,19 @@ import json
 import crud
 app = Flask(__name__)
 
+
+
 @app.route('/')
 def index():
 	 return render_template('index.html')
 
+@app.route('/api/user/login', methods = ['POST'])
+def login():
+	return(crud.login(request.json))
+
 @app.route('/api/user/register', methods = ['POST'])
 def post():
-	json = request.json
-	result = crud.register(json)
-	return(jsonify(response=200))
+	return(crud.register(request.json))
 
 @app.route('/api/tickets/<city>', methods = ['POST'])
 def cityinfo(city):
