@@ -70,28 +70,40 @@ def register(json_arg):
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `1time_code` FROM `USERS` WHERE `phone` = %s", (phone))
+	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", (phone))
 	result = cur.fetchall()
-	
-	response = Response(status = 202)
-	query_result = ""
-	for row in result:
-		query_result = row[0]
-	
-	switch_result = switch_of_register_call(query_result)
-	
-	if (query_result == token):
-		cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, password, balance, active, phone))
-		db.commit()
 
-		### Send SMS
-		send_email.send(mail, random_code)
-		response = Response(status = 200)
+	if (cur.rowcount == 0):
+		cur.close()
+		db.close()
+		### Set 403 code, what means, something went wrong with database
+		return Response(status = 403)
+	else:
+		for row in result:
+			db_1time_code = row[0]
+			db_time_exp = row[1]
+			db_active = row[2]
+		
+		if (db_active == "1"):
+			cur.close()
+			db.close()
 
-	if (query_result != token):
-		response = Response(status = 202)
+			return(Response(status = 202))
+		
+		dbtime_exp_dateformat = datetime.strptime(db_time_exp, "%Y-%m-%d %H:%M:%S")
+		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
 
-	cur.commit()
+		if (current_time < dbtime_exp_dateformat):
+			if (token == db_1time_code):
+				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, password, balance, active, phone))
+				db.commit()
+				response = Response(status = 200)
+
+			else:
+				response = Response(status = 202)
+		else:
+			response = Response(status = 203)
+	
 	cur.close()
 	db.close()
 
