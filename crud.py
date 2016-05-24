@@ -7,6 +7,7 @@ import json
 import time
 import re
 import send_email
+import send_sms
 import MySQLdb
 
 
@@ -34,13 +35,17 @@ def pre_register(json_arg):
 	switch_result = switch_of_register_call(query_result)
 
 	if (switch_result == "add_new"):
-		### SEND SMS
+		send_sms.send_sms(phone, random_code)
+		#send_email.send(mail, random_code)
+		
 		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
 
 	if (switch_result == "new_code"):
-		### SEND SMS
+		send_sms.send_sms(phone, random_code)
+		#send_email.send(mail, random_code)
+
 		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `time_exp`=%s WHERE `phone`=%s", (random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
