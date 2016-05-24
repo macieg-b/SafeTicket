@@ -67,3 +67,6 @@ target/
 # File with output of running server in background
 nohup.out
 log_archive.log
+
+# safeticketenv files
+safeticketenv/
