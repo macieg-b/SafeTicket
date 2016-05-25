@@ -37,11 +37,11 @@ def pre_register(json_arg):
 	if (switch_result == "add_new"):
 		# send_sms.send_sms(phone, random_code)
 		# send_email.send(mail, random_code)
-		
+
 		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
-		
+
 	if (switch_result == "new_code"):
 		# send_sms.send_sms(phone, random_code)
 		# send_email.send(mail, random_code)
@@ -61,7 +61,7 @@ def pre_register(json_arg):
 def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-	
+
 	# random_code = randint(100000, 999999)
 	phone = correct_json["phone"]
 	mail = correct_json["login"]
@@ -71,7 +71,7 @@ def register(json_arg):
 	active = "1"
 	# current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
 	# current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
-	
+
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
@@ -88,13 +88,13 @@ def register(json_arg):
 			db_1time_code = row[0]
 			db_time_exp = row[1]
 			db_active = row[2]
-		
+
 		if (db_active == "1"):
 			cur.close()
 			db.close()
 
 			return(Response(status = 202))
-		
+
 		dbtime_exp_dateformat = datetime.strptime(db_time_exp, "%Y-%m-%d %H:%M:%S")
 		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
 
@@ -108,7 +108,7 @@ def register(json_arg):
 				response = Response(status = 202)
 		else:
 			response = Response(status = 203)
-	
+
 	cur.close()
 	db.close()
 
@@ -117,7 +117,7 @@ def register(json_arg):
 def login(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-	
+
 	mail = correct_json["login"]
 	password = correct_json["password"]
 
@@ -198,4 +198,3 @@ def update_database_code(login, cur, db):
 	send_email.send(login, random_code)
 
 	return
-
