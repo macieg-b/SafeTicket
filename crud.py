@@ -41,7 +41,7 @@ def pre_register(json_arg):
 		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
-
+		
 	if (switch_result == "new_code"):
 		send_sms.send_sms(phone, random_code)
 		#send_email.send(mail, random_code)
