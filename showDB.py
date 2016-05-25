@@ -5,7 +5,7 @@ def SelectAll():
     db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
     cur = db.cursor()
 
-    cur.execute("SELECT * FROM `USERS`")
+    cur.execute("SELECT `Login`, `1time_code` FROM `USERS`")
     result = cur.fetchall()
     print result
     cur.close()
