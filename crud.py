@@ -35,16 +35,16 @@ def pre_register(json_arg):
 	switch_result = switch_of_register_call(query_result)
 
 	if (switch_result == "add_new"):
-		send_sms.send_sms(phone, random_code)
-		#send_email.send(mail, random_code)
+		# send_sms.send_sms(phone, random_code)
+		# send_email.send(mail, random_code)
 		
 		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
 		
 	if (switch_result == "new_code"):
-		send_sms.send_sms(phone, random_code)
-		#send_email.send(mail, random_code)
+		# send_sms.send_sms(phone, random_code)
+		# send_email.send(mail, random_code)
 
 		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `time_exp`=%s WHERE `phone`=%s", (random_code, deadline, phone))
 		db.commit()
@@ -179,57 +179,6 @@ def return_CityInfo(city):
 	js = json.dumps(data)
 	resp = Response(js, status=200, mimetype='application/json')
 	return resp
-
-def user_Activate(jsonArg):
-	#Database connection
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
-	cur = db.cursor()
-	#Execute proper query
-	cur.execute("SELECT `1time_code`, `time_exp` FROM `USERS` WHERE `Login`=%s", [jsonArg['email']])
-
-	results=cur.fetchall()
-	if (cur.rowcount==0):
-		cur.close()
-		db.close()
-		return Response(status=202)
-	else:
-		#Collect data
-		for row in results:
-			db1time_code = row[0]
-			dbtime_exp = row[1]
-
-		#Set proper datatime format 
-		dbtime_exp_dateformat=datetime.strptime(dbtime_exp, "%Y-%m-%d %H:%M:%S")
-		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours=2)
-		print current_time
-		if (current_time < dbtime_exp_dateformat):
-			#Comaprison of 1time_code from json and that one frome Database
-			if(jsonArg['token']==db1time_code):
-				cur.execute("UPDATE `USERS` SET `Active`=1 WHERE `Login`=%s", [jsonArg['email']])
-				retVal=Response(status=200)
-			else:
-				retVal=Response(status=202)
-		else:
-			retVal=Response(status=202)
-
-		#Commit changes, close Database connection and return response
-		cur.close()
-		db.commit()
-		db.close()
-		return retVal
-
-def print_msg(jsonMsg):
-	print("Came into print method")
-
-	correct_data = json.dumps(jsonMsg)
-	print("Correct JSON: " + correct_data)
-
-	correct = json.loads(correct_data)
-	print("LOGIN: " + correct["login"])
-	print("PASSWORD :" + correct["password"])
-
-	return(jsonify(response=200))
-
 
 ### Additional functions
 

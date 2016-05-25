@@ -21,11 +21,7 @@ def post():
 
 @app.route('/api/tickets/<city>', methods = ['POST'])
 def cityinfo(city):
-	return crud.return_CityInfo(city);
-
-@app.route('/api/user/activate', methods = ['POST'])
-def activate():
-	return crud.user_Activate(request.json);
+	return crud.return_CityInfo(city)
 
 if __name__ == '__main__':
 	app.debug=True
