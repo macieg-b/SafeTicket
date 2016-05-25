@@ -5,11 +5,15 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-	 return render_template('index.html')
+	return render_template('index.html')
 
 @app.route('/api/user/login', methods = ['POST'])
 def login():
 	return(crud.login(request.json))
+
+@app.route('/api/user/pre-register', methods = ['POST'])
+def pre_register():
+	return(crud.pre_register(request.json))
 
 @app.route('/api/user/register', methods = ['POST'])
 def post():
@@ -26,3 +30,5 @@ def activate():
 if __name__ == '__main__':
 	app.debug=True
 	app.run(port=8000)
+	#app.run(host='0.0.0.0')
+

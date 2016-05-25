@@ -9,45 +9,101 @@ import re
 import send_email
 import MySQLdb
 
-def register(json_arg):
+
+
+def pre_register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-	
+
+	start_active = "0"
+	phone = correct_json["phone"]
 	random_code = randint(100000, 999999)
-	mail = correct_json["login"]
-	password = correct_json["password"]
-	balance = 5.0
-	begin_active = "0"
-	current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
-	#current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
-	
+	deadline = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
+
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `Active` FROM `USERS` WHERE `Login` = %s", [correct_json['login']])
+	cur.execute("SELECT `Active` FROM `USERS` WHERE `phone` = %s", (phone))
 	result = cur.fetchall()
-	
+
+	response = Response(status = 200)
 	query_result = ""
 	for row in result:
 		query_result = row[0]
-	
+
 	switch_result = switch_of_register_call(query_result)
 
+	if (switch_result == "add_new"):
+		### SEND SMS
+		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
+		db.commit()
+		response = Response(status = 200)
+
 	if (switch_result == "new_code"):
-		update_database_code(mail, cur, db)
+		### SEND SMS
+		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `time_exp`=%s WHERE `phone`=%s", (random_code, deadline, phone))
+		db.commit()
 		response = Response(status = 200)
 
 	if (switch_result == "activated"):
 		response = Response(status = 202)
 
-	if (switch_result == "add_new"):
-		cur.execute("""INSERT INTO users (Login, Hash_password, Balance, Active, 1time_code, time_exp) VALUES (%s, %s, %s, %s, %s, %s)""", (mail, password, balance, begin_active, random_code, current_time))
-		db.commit()
+	cur.close()
+	db.close()
 
-		### Send SMS
-		send_email.send(mail, random_code)
-		response = Response(status = 200)
+	return(response)
 
+def register(json_arg):
+	correct_data = json.dumps(json_arg)
+	correct_json = json.loads(correct_data)
+	
+	# random_code = randint(100000, 999999)
+	phone = correct_json["phone"]
+	mail = correct_json["login"]
+	password = correct_json["password"]
+	token = correct_json["token"]
+	balance = 5.0
+	active = "1"
+	# current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
+	# current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
+	
+	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
+	cur = db.cursor()
+
+	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", (phone))
+	result = cur.fetchall()
+
+	if (cur.rowcount == 0):
+		cur.close()
+		db.close()
+		### Set 403 code, what means, something went wrong with database
+		return Response(status = 403)
+	else:
+		for row in result:
+			db_1time_code = row[0]
+			db_time_exp = row[1]
+			db_active = row[2]
+		
+		if (db_active == "1"):
+			cur.close()
+			db.close()
+
+			return(Response(status = 202))
+		
+		dbtime_exp_dateformat = datetime.strptime(db_time_exp, "%Y-%m-%d %H:%M:%S")
+		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
+
+		if (current_time < dbtime_exp_dateformat):
+			if (token == db_1time_code):
+				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, password, balance, active, phone))
+				db.commit()
+				response = Response(status = 200)
+
+			else:
+				response = Response(status = 202)
+		else:
+			response = Response(status = 203)
+	
 	cur.close()
 	db.close()
 
@@ -66,6 +122,7 @@ def login(json_arg):
 	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", (mail))
 	result = cur.fetchall()
 
+	response = Response(status = 202)
 	query_result = ""
 	for row in result:
 		query_result = row[0]
@@ -76,11 +133,11 @@ def login(json_arg):
 
 	### User exists, incorrect password
 	if (password != query_result and query_result != ""):
-		response = Response(status = 401)
+		response = Response(status = 202)
 
 	### User does not exists
 	if (query_result == ""):
-		response = Response(status = 403)
+		response = Response(status = 202)
 
 	cur.close()
 	db.close()
