@@ -12,11 +12,11 @@ def index():
 def login():
 	return(crud.login(request.json))
 
-@app.route('/api/user/pre-register', methods = ['POST'])
+@app.route('/api/user/pre-register', methods = ['POST', 'GET'])
 def pre_register():
 	return(crud.pre_register(request.json))
 
-@app.route('/api/user/register', methods = ['POST'])
+@app.route('/api/user/register', methods = ['POST', 'GET'])
 def post():
 	return(crud.register(request.json))
 
@@ -27,7 +27,6 @@ def cityinfo(city):
 @app.route('/database')
 def show():
 	rows=showDB.SelectAll()
-	print rows
 	return render_template('showDB.html', data=rows)
 
 if __name__ == '__main__':
