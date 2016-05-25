@@ -12,6 +12,7 @@ import MySQLdb
 
 
 
+
 def pre_register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
@@ -24,15 +25,24 @@ def pre_register(json_arg):
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `Active` FROM `USERS` WHERE `phone` = %s", (phone))
+	cur.execute("SELECT `Active`, `time_exp` FROM `USERS` WHERE `phone` = %s", (phone))
 	result = cur.fetchall()
 
-	response = Response(status = 200)
-	query_result = ""
-	for row in result:
-		query_result = row[0]
+	print(result)
 
-	switch_result = switch_of_register_call(query_result)
+	response = Response(status = 200)
+	active_result = ""
+	exp_time_result = "0" 
+	current_time = "1"
+	for row in result:
+		active_result = row[0]
+		exp_time_result = row[1]
+
+	if (exp_time_result != "0"):
+		dbtime_exp_dateformat = datetime.strptime(exp_time_result, "%Y-%m-%d %H:%M:%S")
+		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
+	
+	switch_result = switch_of_register_call(active_result)
 
 	if (switch_result == "add_new"):
 		# send_sms.send_sms(phone, random_code)
@@ -42,13 +52,20 @@ def pre_register(json_arg):
 		db.commit()
 		response = Response(status = 200)
 
-	if (switch_result == "new_code"):
+	if (switch_result == "new_code" and current_time > dbtime_exp_dateformat):
 		# send_sms.send_sms(phone, random_code)
 		# send_email.send(mail, random_code)
 
 		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `time_exp`=%s WHERE `phone`=%s", (random_code, deadline, phone))
 		db.commit()
 		response = Response(status = 200)
+
+	if (switch_result == "new_code" and current_time < dbtime_exp_dateformat):
+		data = {}
+		data['expiration_time'] = exp_time_result
+		correct_json = json.dumps(data)
+		response = Response(correct_json, status = 203)
+
 
 	if (switch_result == "activated"):
 		response = Response(status = 202)
