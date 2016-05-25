@@ -26,8 +26,6 @@ def pre_register(json_arg):
 	cur.execute("SELECT `Active`, `time_exp` FROM `USERS` WHERE `phone` = %s", (phone))
 	result = cur.fetchall()
 
-	print(result)
-
 	response = Response(status = 200)
 	active_result = ""
 	exp_time_result = "0" 
@@ -76,16 +74,13 @@ def pre_register(json_arg):
 def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-
-	# random_code = randint(100000, 999999)
+	
 	phone = correct_json["phone"]
 	mail = correct_json["login"]
 	password = correct_json["password"]
 	token = correct_json["token"]
 	balance = 5.0
 	active = "1"
-	# current_time = datetime.now() + timedelta(minutes=15) + timedelta(hours=2)
-	# current_time_plus = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
@@ -155,7 +150,7 @@ def login(json_arg):
 	if (password != query_result and query_result != ""):
 		response = Response(status = 202)
 
-	### User does not exists
+	### User does not exist
 	if (query_result == ""):
 		response = Response(status = 202)
 
