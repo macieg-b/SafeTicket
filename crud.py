@@ -11,8 +11,6 @@ import send_sms
 import MySQLdb
 
 
-
-
 def pre_register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
