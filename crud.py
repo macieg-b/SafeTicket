@@ -159,20 +159,36 @@ def login(json_arg):
 
 	return(response)
 
-def return_CityInfo(city):
+def return_city_info(city):
 	#Database connection
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
-	#Execute proper query
-	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", [city])
-	results=cur.fetchall()
+
+	print(city)
+
+	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHER `Cityname`=%s", (city))
+	count_result = cur.fetchtall()
+
+	for row in count_result:
+		count = row[0]
+	
+	if (count == 0):
+		### TODO: Set status code
+		### Above city does not exist in database
+		return(Response(status = 203))
+
+	cur.execute("SELECT `Discount`, `Type`, `Time`, `Price` FROM `CITYINFO` WHERE CityName=%s", (city))
+	results = cur.fetchall()
+
+	print(result)
 
 	#Collect data
 	for row in results:
-		dbCityName = row[1]
-		dbDiscount = row[2]
-		dbType = row[3]
-		dbTime = row[4]
+		db_discount = row[0]
+		db_type = row[1]
+		db_time = row[2]
+		db_price = row[3]
+	
 	cur.close()
 	db.close()
 
@@ -181,14 +197,18 @@ def return_CityInfo(city):
 
 	#Return proper response and json
 	data={
-		'cityname' : dbCityName,
-		'discount' : dbDiscount,
-		'type' : dbType,
-		'time' : dbTime
+		'cityname' : db_discount,
+		'discount' : db_type,
+		'type' : db_time,
+		'time' : dd_price
 	}
 	js = json.dumps(data)
 	resp = Response(js, status=200, mimetype='application/json')
+	
 	return resp
+
+
+
 
 ### Additional functions
 
