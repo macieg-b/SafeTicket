@@ -1,13 +1,14 @@
 from flask import Response
 from setting import hostData, userData, passData, dbData
 import MySQLdb
+from math import fabs
+from datetime import datetime, timedelta
 
 def checkBalance(email):
     db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
     cur = db.cursor()
-    cur.execute("SELECT `balance` FROM `USERS` WHERE `Login` = %s", (email))
+    cur.execute("SELECT `Balance` FROM `USERS` WHERE `Login` = %s", [email])
     result = cur.fetchall()
-
     if (cur.rowcount == 0):
         cur.close()
         db.close()
@@ -17,25 +18,42 @@ def checkBalance(email):
             balance=row[0]
         cur.close()
         db.close()
-        return balance
+    return balance
+
 
 def buyTickets(jsonArg):
-    print "W time ticket"
-    priceSum=jsonArg['price']*jsronArg['count']
-    if(checkBalance(jsonArg['email']) == None):
-        return Response(type=403)
-    else:
-        balance=checkBalance(jsonArg['email'])
+    #Catch data from jsonArg
+    email = jsonArg['email']
+    cityName = jsonArg['cityname']
+    discount = jsonArg['discount']
+    typ = jsonArg['type']
+    time = jsonArg['time']
+    count = jsonArg['count']
+    price = jsonArg['price']
 
-    if(priceSum>balance):
-        return Response(type=202)
+    #User doesn't exsist in DB
+    if checkBalance(email)==None:
+        return Response(status=203)
+    #User exsist in DB
     else:
-        newBalance=balance-priceSum
-        db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
-        cur = db.cursor()
-        cur.execute("INSERT INTO `tickets` (`email`, `cityname`, `discount`, `type`, `time`, `count`, `price`) VALUES (%s, %s, %s, %s, %s, %s, %s)", (jsonArg['email'], jsonArg['cityname'], jsonArg['discount'], jsonArg['type'], jsonArg['time'], jsonArg['count'], jsonArg['price']))
-        cur.execute("UPDATE `USERS` SET `balance`=%s WHERE `Login`=%s", (newBalance, jsonArg['email']))
-        db.commit()
-        cur.close()
-        db.close()
-        return Response(type=200)
+        balance = checkBalance(email)
+        priceSum = float(price) * float(count)
+        #Not enough funds
+        if priceSum>balance:
+            return Response(status=202)
+        #Enough funds
+        else:
+            db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+            db.autocommit(False)
+            cur = db.cursor()
+            newBalance = balance - fabs(priceSum)
+            starttime = datetime.utcnow() + timedelta(hours=2)
+            try:
+                cur.execute("INSERT INTO `tickets` (`email`, `cityname`, `discount`, `type`, `time`, `count`, `price`, `starttime`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", [email, cityName, discount, typ, time, count, price, starttime])
+                cur.execute("UPDATE `USERS` SET `balance`=%s WHERE `Login`=%s", [newBalance, email])
+                db.commit()
+                return Response(status=200)
+            except ValueError:
+                print ValueError
+                db.rollback()
+                return Response(status=206)
