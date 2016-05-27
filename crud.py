@@ -202,6 +202,9 @@ def return_city_info(city):
 	return(response)
 
 
+
+
+
 ### Additional functions
 
 # 'Python' switch()
