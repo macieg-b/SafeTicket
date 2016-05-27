@@ -7,7 +7,7 @@ import json
 import time
 import re
 import send_email
-import send_sms
+#import send_sms
 import MySQLdb
 import ticket_time
 
@@ -193,7 +193,7 @@ def return_CityInfo(city):
 
 def buyTimeTicket(jsonArg):
 	print "W crudzie"
-	return (ticket_time.buyTickets(jsonArg))
+	return ticket_time.buyTickets(jsonArg)
 
 ### Additional functions
 

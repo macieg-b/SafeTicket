@@ -24,10 +24,10 @@ def post():
 def cityinfo(city):
 	return crud.return_CityInfo(city)
 
-@app.route('/api/tickets/buyTimeTicket', methods = ['POST'])
+@app.route('/api/tickets/buytimeticket', methods = ['POST'])
 def timeTicket():
 	print "Przed crudem"
-	return (crud.buyTimeTicket(request.json))
+	return crud.buyTimeTicket(request.json))
 
 @app.route('/database')
 def show():
