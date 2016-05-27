@@ -9,6 +9,7 @@ import re
 import send_email
 import send_sms
 import MySQLdb
+import ticket_time
 
 
 def pre_register(json_arg):
@@ -28,7 +29,7 @@ def pre_register(json_arg):
 
 	response = Response(status = 200)
 	active_result = ""
-	exp_time_result = "0" 
+	exp_time_result = "0"
 	current_time = "1"
 	for row in result:
 		active_result = row[0]
@@ -37,7 +38,7 @@ def pre_register(json_arg):
 	if (exp_time_result != "0"):
 		dbtime_exp_dateformat = datetime.strptime(exp_time_result, "%Y-%m-%d %H:%M:%S")
 		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
-	
+
 	switch_result = switch_of_register_call(active_result)
 
 	if (switch_result == "add_new"):
@@ -74,7 +75,7 @@ def pre_register(json_arg):
 def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-	
+
 	phone = correct_json["phone"]
 	mail = correct_json["login"]
 	password = correct_json["password"]
@@ -189,6 +190,10 @@ def return_CityInfo(city):
 	js = json.dumps(data)
 	resp = Response(js, status=200, mimetype='application/json')
 	return resp
+
+def buyTimeTicket(jsonArg):
+	print "W crudzie"
+	return (ticket_time.buyTickets(jsonArg))
 
 ### Additional functions
 
