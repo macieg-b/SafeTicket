@@ -6,6 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+	print ("DUPAAA")
 	return render_template('index.html')
 
 @app.route('/api/user/login', methods = ['POST'])
@@ -24,10 +25,9 @@ def post():
 def cityinfo(city):
 	return crud.return_CityInfo(city)
 
-@app.route('/api/tickets/buytimeticket', methods = ['POST'])
-def timeTicket():
-	print "Przed crudem"
-	return crud.buyTimeTicket(request.json))
+@app.route('/api/ticket/time_ticket', methods = ['POST', 'GET'])
+def time_ticket():
+	return(crud.buyTimeTicket(request.json))
 
 @app.route('/database')
 def show():
