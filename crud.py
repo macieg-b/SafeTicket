@@ -182,10 +182,10 @@ def return_city_info(city):
 	db.close()
 
 	table = []
-	group = {}
 	json_form = {}
 
 	for i in range(0, count):
+		group = {}
 		group['discount'] = result[i][0]
 		group['type'] = result[i][1]
 		group['time'] = result[i][2]
