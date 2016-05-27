@@ -7,7 +7,6 @@ def SelectAll():
 
     cur.execute("SELECT `Login`, `1time_code` FROM `USERS`")
     result = cur.fetchall()
-    print result
     cur.close()
     db.close()
     return result

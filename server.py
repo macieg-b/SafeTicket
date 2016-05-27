@@ -27,7 +27,6 @@ def cityinfo(city):
 @app.route('/database')
 def show():
 	rows=showDB.SelectAll()
-	print rows
 	return render_template('showDB.html', data=rows)
 
 if __name__ == '__main__':
