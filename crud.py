@@ -111,7 +111,8 @@ def register(json_arg):
 
 		if (current_time < dbtime_exp_dateformat):
 			if (token == db_1time_code):
-				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, password, balance, active, phone))
+				hashedPassword = hashing.hash_value(password, salt="krolpejas")
+				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, hashedPassword, balance, active, phone))
 				db.commit()
 				response = Response(status = 200)
 
@@ -143,12 +144,13 @@ def login(json_arg):
 	for row in result:
 		query_result = row[0]
 
+
 	### Correct pass:
-	if (password == query_result):
+	if hashing.check_value(query_result, password, salt="krolpejas"):
 		response = Response(status = 200)
 
 	### User exists, incorrect password
-	if (password != query_result and query_result != ""):
+	if hashing.check_value(query_result, password, salt="krolpejas") and query_result != "":
 		response = Response(status = 202)
 
 	### User does not exist
@@ -201,9 +203,6 @@ def return_city_info(city):
 	response = Response(json_to_send, status=200, mimetype='application/json')
 
 	return(response)
-
-
-
 
 
 def buyTimeTicket(jsonArg):
