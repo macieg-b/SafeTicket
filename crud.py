@@ -78,10 +78,10 @@ def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 
-	phone = correct_json["phone"]
-	mail = correct_json["login"]
-	password = correct_json["password"]
-	token = correct_json["token"]
+	phone = (correct_json["phone"]).encode('utf-8').strip()
+	mail = (correct_json["login"]).encode('utf-8').strip()
+	password = (correct_json["password"]).encode('utf-8').strip()
+	token = (correct_json["token"]).encode('utf-8').strip()
 	balance = 5.0
 	active = "1"
 
@@ -131,8 +131,8 @@ def login(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 
-	mail = correct_json["login"]
-	password = correct_json["password"]
+	mail = (correct_json["login"]).encode('utf-8').strip()
+	password = (correct_json["password"]).encode('utf-8').strip()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
