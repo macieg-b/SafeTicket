@@ -2,7 +2,6 @@ from setting import hostData, userData, passData, dbData
 import MySQLdb
 
 def SelectAll():
-    print "TEST"
     db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
     cur = db.cursor()
 

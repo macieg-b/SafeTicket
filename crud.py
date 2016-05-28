@@ -9,6 +9,7 @@ import re
 import send_email
 import send_sms
 import MySQLdb
+import ticket_time
 
 
 def pre_register(json_arg):
@@ -204,6 +205,9 @@ def return_city_info(city):
 
 
 
+
+def buyTimeTicket(jsonArg):
+	return ticket_time.buyTickets(jsonArg)
 
 ### Additional functions
 
