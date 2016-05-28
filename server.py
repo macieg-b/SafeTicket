@@ -20,9 +20,9 @@ def pre_register():
 def post():
 	return(crud.register(request.json))
 
-@app.route('/api/tickets/<city>', methods = ['POST'])
+@app.route('/api/tickets/<city>', methods = ['POST', 'GET'])
 def cityinfo(city):
-	return crud.return_CityInfo(city)
+	return crud.return_city_info(city)
 
 @app.route('/database')
 def show():

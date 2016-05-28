@@ -28,7 +28,7 @@ def pre_register(json_arg):
 
 	response = Response(status = 200)
 	active_result = ""
-	exp_time_result = "0" 
+	exp_time_result = "0"
 	current_time = "1"
 	for row in result:
 		active_result = row[0]
@@ -37,7 +37,7 @@ def pre_register(json_arg):
 	if (exp_time_result != "0"):
 		dbtime_exp_dateformat = datetime.strptime(exp_time_result, "%Y-%m-%d %H:%M:%S")
 		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
-	
+
 	switch_result = switch_of_register_call(active_result)
 
 	if (switch_result == "add_new"):
@@ -74,7 +74,7 @@ def pre_register(json_arg):
 def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
-	
+
 	phone = correct_json["phone"]
 	mail = correct_json["login"]
 	password = correct_json["password"]
@@ -159,36 +159,51 @@ def login(json_arg):
 
 	return(response)
 
-def return_CityInfo(city):
-	#Database connection
+def return_city_info(city):
 	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
-	#Execute proper query
-	cur.execute("SELECT `ID`, `CityName`, `Discount`, `Type`, `Time` FROM `CITYINFO` WHERE CityName=%s", [city])
-	results=cur.fetchall()
 
-	#Collect data
-	for row in results:
-		dbCityName = row[1]
-		dbDiscount = row[2]
-		dbType = row[3]
-		dbTime = row[4]
+	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
+	count_result = cur.fetchall()
+	count = count_result[0][0]
+
+	if (count == 0):
+		### TODO: Set status code
+		### Above city does not exist in database
+		cur.close()
+		db.close()
+
+		return(Response(status = 203))
+
+	cur.execute("SELECT `Discount`, `Type`, `Time`, `Price` FROM `CITYINFO` WHERE `Cityname`=%s", [city])
+	result = cur.fetchall()
+
 	cur.close()
 	db.close()
 
-	#Return proper json - old method
-	#return jsonify(cityname=dbCityName, discount=[dbDiscount], type=[dbType], time=[dbTime])
+	table = []
+	json_form = {}
 
-	#Return proper response and json
-	data={
-		'cityname' : dbCityName,
-		'discount' : dbDiscount,
-		'type' : dbType,
-		'time' : dbTime
-	}
-	js = json.dumps(data)
-	resp = Response(js, status=200, mimetype='application/json')
-	return resp
+	for i in range(0, count):
+		group = {}
+		group['discount'] = result[i][0]
+		group['type'] = result[i][1]
+		group['time'] = result[i][2]
+		group['price'] = result[i][3]
+
+		table.append(group)
+
+	json_form['city'] = str(city)
+	json_form['cases'] = table
+
+	json_to_send = json.dumps(json_form)
+	response = Response(json_to_send, status=200, mimetype='application/json')
+
+	return(response)
+
+
+
+
 
 ### Additional functions
 
@@ -207,4 +222,4 @@ def update_database_code(login, cur, db):
 	# SEND SMS
 	send_email.send(login, random_code)
 
-	return
+	return 0

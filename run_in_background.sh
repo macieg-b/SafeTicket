@@ -1,9 +1,18 @@
 #!/bin/bash
 
-PROCESS_NUM=$(ps aux | grep server.py | wc -l)
+PROCESS_NUM="ps aux | grep server.py | wc -l"
 
-if [ $PROCESS_NUM = 1 ]; then
+count=`eval $PROCESS_NUM`
+
+if [ $count == "1" ]; then
 	nohup python server.py &
+
+	count=`eval $PROCESS_NUM`
+	if [ $count == "1" ]; then
+		printf "\n\nSomething went wrong! Check script correct and try again\n\n\n"
+	else
+		printf "\n\nServer start\n\n\n" 	
+	fi
 else
-	echo "Server is already running"
+	printf "\n\nServer is already running\n\n\n"
 fi
