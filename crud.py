@@ -1,4 +1,5 @@
 from flask import jsonify, json, Response
+from flask.ext.hashing import Hashing
 from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
@@ -82,6 +83,7 @@ def register(json_arg):
 	token = correct_json["token"]
 	balance = 5.0
 	active = "1"
+	hashing = Hashing()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
@@ -132,6 +134,7 @@ def login(json_arg):
 
 	mail = correct_json["login"]
 	password = correct_json["password"]
+	hashing = Hashing()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()

@@ -1,11 +1,9 @@
 from flask import Flask, request, jsonify, render_template
-from flask.ext.hashing import Hashing
 import json
 import crud
 import show_db
 
 app = Flask(__name__)
-hashing = Hashing(app)
 
 @app.route('/')
 def index():
