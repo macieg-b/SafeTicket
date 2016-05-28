@@ -31,7 +31,7 @@ def time_ticket():
 
 @app.route('/database')
 def show():
-	rows=showDB.SelectAll()
+	rows=show_db.SelectAll()
 	return render_template('showDB.html', data=rows)
 
 if __name__ == '__main__':
