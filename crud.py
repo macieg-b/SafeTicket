@@ -12,6 +12,7 @@ import send_sms
 import MySQLdb
 import ticket_time
 
+hashing = Hashing()
 
 def pre_register(json_arg):
 	correct_data = json.dumps(json_arg)
@@ -83,12 +84,10 @@ def register(json_arg):
 	token = correct_json["token"]
 	balance = 5.0
 	active = "1"
-	hashing = Hashing()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
-
-	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", (phone))
+	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", [phone])
 	result = cur.fetchall()
 
 	if (cur.rowcount == 0):
@@ -134,12 +133,11 @@ def login(json_arg):
 
 	mail = correct_json["login"]
 	password = correct_json["password"]
-	hashing = Hashing()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", (mail))
+	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", [mail])
 	result = cur.fetchall()
 
 	response = Response(status = 202)
@@ -147,13 +145,12 @@ def login(json_arg):
 	for row in result:
 		query_result = row[0]
 
-
 	### Correct pass:
-	if hashing.check_value(query_result, password, salt="krolpejas"):
+	if (hashing.check_value(query_result, password, salt="krolpejas")):
 		response = Response(status = 200)
 
 	### User exists, incorrect password
-	if hashing.check_value(query_result, password, salt="krolpejas") and query_result != "":
+	if (not(hashing.check_value(query_result, password, salt="krolpejas")) and query_result != ""):
 		response = Response(status = 202)
 
 	### User does not exist
