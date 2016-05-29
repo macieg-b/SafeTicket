@@ -1,4 +1,5 @@
 from flask import jsonify, json, Response
+from flask.ext.hashing import Hashing
 from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
@@ -11,6 +12,7 @@ import send_sms
 import MySQLdb
 import ticket_time
 
+hashing = Hashing()
 
 def pre_register(json_arg):
 	correct_data = json.dumps(json_arg)
@@ -76,17 +78,16 @@ def register(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 
-	phone = correct_json["phone"]
-	mail = correct_json["login"]
-	password = correct_json["password"]
-	token = correct_json["token"]
+	phone = (correct_json["phone"]).encode('utf-8').strip()
+	mail = (correct_json["login"]).encode('utf-8').strip()
+	password = (correct_json["password"]).encode('utf-8').strip()
+	token = (correct_json["token"]).encode('utf-8').strip()
 	balance = 5.0
 	active = "1"
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
-
-	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", (phone))
+	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", [phone])
 	result = cur.fetchall()
 
 	if (cur.rowcount == 0):
@@ -111,7 +112,8 @@ def register(json_arg):
 
 		if (current_time < dbtime_exp_dateformat):
 			if (token == db_1time_code):
-				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, password, balance, active, phone))
+				hashedPassword = hashing.hash_value(password, salt="krolpejas")
+				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, hashedPassword, balance, active, phone))
 				db.commit()
 				response = Response(status = 200)
 
@@ -129,13 +131,13 @@ def login(json_arg):
 	correct_data = json.dumps(json_arg)
 	correct_json = json.loads(correct_data)
 
-	mail = correct_json["login"]
-	password = correct_json["password"]
+	mail = (correct_json["login"]).encode('utf-8').strip()
+	password = (correct_json["password"]).encode('utf-8').strip()
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", (mail))
+	cur.execute("SELECT `Hash_password` FROM `USERS` WHERE `Login` = %s", [mail])
 	result = cur.fetchall()
 
 	response = Response(status = 202)
@@ -144,11 +146,11 @@ def login(json_arg):
 		query_result = row[0]
 
 	### Correct pass:
-	if (password == query_result):
+	if (hashing.check_value(query_result, password, salt="krolpejas")):
 		response = Response(status = 200)
 
 	### User exists, incorrect password
-	if (password != query_result and query_result != ""):
+	if (not(hashing.check_value(query_result, password, salt="krolpejas")) and query_result != ""):
 		response = Response(status = 202)
 
 	### User does not exist
@@ -201,9 +203,6 @@ def return_city_info(city):
 	response = Response(json_to_send, status=200, mimetype='application/json')
 
 	return(response)
-
-
-
 
 
 def buyTimeTicket(jsonArg):
