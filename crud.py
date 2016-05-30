@@ -4,6 +4,8 @@ from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
 from setting import hostData, userData, passData, dbData
+from setting import hostDataAzure, userDataAzure, passDataAzure, dbDataAzure
+from setting import hash_salt
 import json
 import time
 import re
@@ -111,7 +113,7 @@ def register(json_arg):
 
 		if (current_time < dbtime_exp_dateformat):
 			if (token == db_1time_code):
-				hashedPassword = hashing.hash_value(password, salt="krolpejas")
+				hashedPassword = hashing.hash_value(password, salt=hash_salt)
 				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `Phone`=%s", [mail, hashedPassword, balance, active, phone])
 				db.commit()
 				response = Response(status = 200)
@@ -145,11 +147,11 @@ def login(json_arg):
 		query_result = row[0]
 
 	### Correct pass:
-	if (hashing.check_value(query_result, password, salt="krolpejas")):
+	if (hashing.check_value(query_result, password, salt=hash_salt)):
 		response = Response(status = 200)
 
 	### User exists, incorrect password
-	if (not(hashing.check_value(query_result, password, salt="krolpejas")) and query_result != ""):
+	if (not(hashing.check_value(query_result, password, salt=hash_salt)) and query_result != ""):
 		response = Response(status = 202)
 
 	### User does not exist
@@ -162,7 +164,7 @@ def login(json_arg):
 	return(response)
 
 def return_city_info(city):
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	db = MySQLdb.connect(host = hostDataAzure, user = userDataAzure, passwd = passDataAzure, db = dbDataAzure)
 	cur = db.cursor()
 
 	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
