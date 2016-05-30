@@ -164,7 +164,7 @@ def login(json_arg):
 	return(response)
 
 def return_city_info(city):
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	db = MySQLdb.connect(host=hostDataAzure, user=userDataAzure, passwd=passDataAzure, db=dbDataAzure)
 	cur = db.cursor()
 
 	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
