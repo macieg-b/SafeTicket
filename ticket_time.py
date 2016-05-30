@@ -49,8 +49,8 @@ def buyTickets(jsonArg):
             newBalance = balance - fabs(priceSum)
             starttime = datetime.utcnow() + timedelta(hours=2)
             try:
-                cur.execute("INSERT INTO `tickets` (`email`, `cityname`, `discount`, `type`, `time`, `count`, `price`, `starttime`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", [email, cityName, discount, typ, time, count, price, starttime])
-                cur.execute("UPDATE `USERS` SET `balance`=%s WHERE `Login`=%s", [newBalance, email])
+                cur.execute("INSERT INTO `TICKETS` (`Email`, `Cityname`, `Discount`, `Type`, `Time`, `Count`, `Price`, `Starttime`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", [email, cityName, discount, typ, time, count, price, starttime])
+                cur.execute("UPDATE `USERS` SET `Balance`=%s WHERE `Login`=%s", [newBalance, email])
                 db.commit()
                 return Response(status=200)
             except ValueError:

@@ -4,6 +4,8 @@ from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
 from setting import hostData, userData, passData, dbData
+from setting import hostDataAzure, userDataAzure, passDataAzure, dbDataAzure
+from setting import hash_salt
 import json
 import time
 import re
@@ -26,7 +28,7 @@ def pre_register(json_arg):
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
 
-	cur.execute("SELECT `Active`, `time_exp` FROM `USERS` WHERE `phone` = %s", (phone))
+	cur.execute("SELECT `Active`, `Time_exp` FROM `USERS` WHERE `Phone` = %s", [phone])
 	result = cur.fetchall()
 
 	response = Response(status = 200)
@@ -47,7 +49,7 @@ def pre_register(json_arg):
 		# send_sms.send_sms(phone, random_code)
 		# send_email.send(mail, random_code)
 
-		cur.execute("""INSERT INTO users (Active, 1time_code, time_exp, phone) VALUES (%s, %s, %s, %s)""", (start_active, random_code, deadline, phone))
+		cur.execute("""INSERT INTO `USERS` (Active, 1time_code, Time_exp, Phone) VALUES (%s, %s, %s, %s)""", [start_active, random_code, deadline, phone])
 		db.commit()
 		response = Response(status = 200)
 
@@ -55,7 +57,7 @@ def pre_register(json_arg):
 		# send_sms.send_sms(phone, random_code)
 		# send_email.send(mail, random_code)
 
-		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `time_exp`=%s WHERE `phone`=%s", (random_code, deadline, phone))
+		cur.execute("UPDATE `USERS` SET `1time_code`=%s, `Time_exp`=%s WHERE `Phone`=%s", [random_code, deadline, phone])
 		db.commit()
 		response = Response(status = 200)
 
@@ -87,7 +89,7 @@ def register(json_arg):
 
 	db = MySQLdb.connect(host = hostData, user = userData, passwd = passData, db = dbData)
 	cur = db.cursor()
-	cur.execute("SELECT `1time_code`, `time_exp`, `Active` FROM `USERS` WHERE `phone` = %s", [phone])
+	cur.execute("SELECT `1time_code`, `Time_exp`, `Active` FROM `USERS` WHERE `Phone` = %s", [phone])
 	result = cur.fetchall()
 
 	if (cur.rowcount == 0):
@@ -98,7 +100,7 @@ def register(json_arg):
 	else:
 		for row in result:
 			db_1time_code = row[0]
-			db_time_exp = row[1]
+			dbtime_exp_dateformat = row[1]
 			db_active = row[2]
 
 		if (db_active == "1"):
@@ -107,13 +109,12 @@ def register(json_arg):
 
 			return(Response(status = 202))
 
-		dbtime_exp_dateformat = datetime.strptime(db_time_exp, "%Y-%m-%d %H:%M:%S")
 		current_time = datetime.strptime(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), "%Y-%m-%d %H:%M:%S") + timedelta(hours = 2)
 
 		if (current_time < dbtime_exp_dateformat):
 			if (token == db_1time_code):
-				hashedPassword = hashing.hash_value(password, salt="krolpejas")
-				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `phone`=%s", (mail, hashedPassword, balance, active, phone))
+				hashedPassword = hashing.hash_value(password, salt=hash_salt)
+				cur.execute("UPDATE `USERS` SET `Login`=%s, `Hash_password`=%s, `Balance`=%s, `Active`=%s WHERE `Phone`=%s", [mail, hashedPassword, balance, active, phone])
 				db.commit()
 				response = Response(status = 200)
 
@@ -146,11 +147,11 @@ def login(json_arg):
 		query_result = row[0]
 
 	### Correct pass:
-	if (hashing.check_value(query_result, password, salt="krolpejas")):
+	if (hashing.check_value(query_result, password, salt=hash_salt)):
 		response = Response(status = 200)
 
 	### User exists, incorrect password
-	if (not(hashing.check_value(query_result, password, salt="krolpejas")) and query_result != ""):
+	if (not(hashing.check_value(query_result, password, salt=hash_salt)) and query_result != ""):
 		response = Response(status = 202)
 
 	### User does not exist
@@ -163,7 +164,7 @@ def login(json_arg):
 	return(response)
 
 def return_city_info(city):
-	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	db = MySQLdb.connect(host=hostDataAzure, user=userDataAzure, passwd=passDataAzure, db=dbDataAzure)
 	cur = db.cursor()
 
 	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
@@ -220,7 +221,7 @@ def switch_of_register_call(result):
 
 def update_database_code(login, cur, db):
 	random_code = randint(100000, 999999)
-	cur.execute("UPDATE `USERS` SET `1time_code`=%s WHERE `Login`=%s", (random_code, login))
+	cur.execute("UPDATE `USERS` SET `1time_code`=%s WHERE `Login`=%s", [random_code, login])
 	db.commit()
 	# SEND SMS
 	send_email.send(login, random_code)
