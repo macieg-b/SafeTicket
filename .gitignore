@@ -70,3 +70,6 @@ log_archive.log
 
 # safeticketenv files
 safeticketenv/
+
+# Client scripts
+client/
