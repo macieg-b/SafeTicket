@@ -164,7 +164,7 @@ def login(json_arg):
 	return(response)
 
 def return_city_info(city):
-	db = MySQLdb.connect(host=hostDataAzure, user=userDataAzure, passwd=passDataAzure, db=dbDataAzure)	
+	db = MySQLdb.connect(host=hostDataAzure, user=userDataAzure, passwd=passDataAzure, db=dbDataAzure)
 	cur = db.cursor()
 
 	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
@@ -204,7 +204,61 @@ def return_city_info(city):
 	response = Response(json_to_send, status=200, mimetype='application/json')
 
 	return(response)
+	
+def return_ticket_dictionary(city):
+	db = MySQLdb.connect(host = hostDataAzure, user = userDataAzure, passwd = passDataAzure, db = dbDataAzure)
+	cur = db.cursor()
 
+	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
+	count_result = cur.fetchall()
+	count = count_result[0][0]
+
+	if (count == 0):
+		### TODO: Set status code
+		### Above city does not exist in database
+		cur.close()
+		db.close()
+
+		return(Response(status = 203))
+
+	cur.execute("SELECT MIN(`Discount`) FROM `CITYINFO` WHERE `Cityname`=%s group by `Discount`", [city])
+	discount_cur = cur.fetchall()
+
+	discount_table = []
+	for i in discount_cur:
+		single_row = {}
+		single_row['discount'] = i[0]
+		discount_table.append(single_row)
+
+	cur.execute("""SELECT MIN(`Type`) FROM `CITYINFO` WHERE `Cityname`=%s group by `Type` """, [city])
+	type_cur = cur.fetchall()
+
+	type_table = []
+	for i in type_cur:
+		single_row = {}
+		single_row['type'] = i[0]
+		type_table.append(single_row)
+
+	cur.execute("""SELECT MIN(`Time`) FROM `CITYINFO` WHERE `Cityname`=%s group by `Time` order by length(Time) ASC""", [city])
+	time_cur = cur.fetchall()
+
+	cur.close()
+	db.close()
+
+	time_table = []
+	for i in time_cur:
+		time_table.append(i[0])
+
+	form = {}
+	form['city'] = str(city)
+	form['discounts'] = discount_table
+	form['type'] = type_table
+	form['time'] = time_table
+
+	json_to_send = json.dumps(form)
+	response = Response(json_to_send, status=200, mimetype='application/json')
+
+	return(response)
 
 def buyTimeTicket(jsonArg):
 	return ticket_time.buyTickets(jsonArg)

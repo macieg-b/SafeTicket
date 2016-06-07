@@ -29,9 +29,14 @@ def cityinfo(city):
 def time_ticket():
 	return (crud.buyTimeTicket(request.json))
 
+@app.route('/api/tickets-dictionary/<city>', methods = ['POST', 'GET'])
+def ticketdictionary(city):
+	return crud.return_ticket_dictionary(city)
+
 @app.route('/database', methods = ['GET'])
 def show():
 	return render_template('showDB.html', data=show_db.SelectAll())
+
 
 if __name__ == '__main__':
 	app.debug=True
