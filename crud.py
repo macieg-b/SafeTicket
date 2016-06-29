@@ -4,13 +4,12 @@ from random import randint
 from datetime import datetime, timedelta
 from  time import gmtime, strftime
 from setting import hostData, userData, passData, dbData
-from setting import hostDataAzure, userDataAzure, passDataAzure, dbDataAzure
 from setting import hash_salt
 import json
 import time
 import re
 import send_email
-import send_sms
+#import send_sms
 import MySQLdb
 import ticket_time
 
@@ -164,7 +163,7 @@ def login(json_arg):
 	return(response)
 
 def return_city_info(city):
-	db = MySQLdb.connect(host=hostDataAzure, user=userDataAzure, passwd=passDataAzure, db=dbDataAzure)	
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
 	cur = db.cursor()
 
 	cur.execute("SELECT COUNT(*) FROM `CITYINFO` WHERE `Cityname`=%s", [city])
