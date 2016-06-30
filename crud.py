@@ -208,8 +208,35 @@ def return_city_info(city):
 def buyTimeTicket(jsonArg):
 	return ticket_time.buyTickets(jsonArg)
 
-### Additional functions
+def getBalance(jsonArg):
+	db = MySQLdb.connect(host=hostData, user=userData, passwd=passData, db=dbData)
+	cur = db.cursor()
+	cur.execute("SELECT Hash_password, Balance FROM `USERS` WHERE `Login`=%s", [jsonArg['login']])
+	result = cur.fetchall()
+	if (cur.rowcount == 0):
+		### Set 202 - now user in DB
+		cur.close()
+		db.close()
+		return Response(status = 202)
+	else:
+		for row in result:
+			hashedPassword = row[0]
+			balance = row[1]
+		jsonForm={}
+		jsonForm['balance'] = balance
+		jsonToSend = json.dumps(jsonForm)
+		if (hashing.check_value(hashedPassword, jsonArg['password'], salt=hash_salt)):
+			cur.close()
+			db.close()
+			return Response(jsonToSend, status=200, mimetype='application/json')
+		else:
+			cur.close()
+			db.close()
+			return Response(status = 202)
 
+
+
+### Additional functions
 # 'Python' switch()
 def switch_of_register_call(result):
 	switcher = {
