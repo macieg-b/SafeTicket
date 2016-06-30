@@ -21,6 +21,10 @@ def pre_register():
 def post():
 	return(crud.register(request.json))
 
+@app.route('/api/user/balance', methods = ['POST'])
+def balance():
+	return(crud.getBalance(request.json))
+
 @app.route('/api/tickets/<city>', methods = ['GET'])
 def cityinfo(city):
 	return crud.return_city_info(city)
